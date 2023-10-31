@@ -1,0 +1,82 @@
+const typeDefs = `
+  type User {
+    name: String!
+    email: String!
+    otp: String!
+    phoneNumber: String!
+    pub: String!
+  }
+
+  type ChatMetadata {
+    roomId: ID!
+    lastMessage: String
+    icon: String
+    lastMessageTime: String
+    messagesCounter: String
+  }
+
+ type Query {
+    users: [User]!
+    user(id: ID!): User
+    chats: [Chat]!
+    chat(roomId: ID!): Chat
+    getRoomMessages(roomId: ID!): [Message]!
+    getAllChatMetadata(userId: String!): [ChatMetadata]!
+  }
+
+  type Mutation {
+    register(phoneNumber: String!): RegisterResult
+    verify(userId: String!, otp: String!): VerifyResult
+    emptyUserNode: EmptyUsers
+    sendMessage(roomId: String!, message: String!, userId: String!): Message
+    updateProfile(firstName: String!, lastName: String!, dateOfBirth: String!, phone: String!, pin: String!): UpdateProfileResult 
+  }
+
+  type UpdateProfileResult {
+    message: String
+    success: Boolean
+  }
+
+  type RegisterResult {
+    message: String
+    isReg: Boolean
+  }
+
+  type User {
+    pub: String
+    phoneNumber: String
+    otp: String
+  }
+
+  type Payload {
+    public_key: String
+  }
+
+  type VerifyResult {
+    success: Boolean
+    message: String
+    payload: Payload
+    status: Int
+  }
+
+  type EmptyUsers {
+    success: Boolean
+    message: String
+    status: Int
+  }
+
+  type Message {
+    messageId: ID!
+    userId: String!
+    roomId: String!
+    message: String!
+    timestamp: String
+  }
+
+  type Chat {
+    roomId: ID!
+    messages: [Message]!
+  }
+`;
+
+module.exports = typeDefs;
