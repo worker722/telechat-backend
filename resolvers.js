@@ -15,7 +15,7 @@ function generateRandomString(length) {
 function createEncryptedKey(phoneNumber) {
   const randomString1 = generateRandomString(16);
   const randomString2 = generateRandomString(16);
-  
+
   const dataToHash = phoneNumber + randomString1 + randomString2;
 
   const encryptedKey = crypto.createHash('sha256').update(dataToHash).digest('hex');
@@ -33,7 +33,7 @@ const sendMessage = async (body, phoneNumber, successMessage, failedMessage) => 
       from: process.env.TWILIO_PHONE_NUMBER || '+525565280223',
       to: '+' + phoneNumber
     });
-    
+
     console.log('Verification code sent successfully:', successMessage);
     return { message: 'Verification code sent to your phone number' };
   } catch (error) {
@@ -58,7 +58,7 @@ const resolvers = {
     users: async () => {
       return new Promise((resolve, reject) => {
         const allUsers = [];
-        
+
         gun.get('users').map().on((data, key) => {
           // console.log("users", data);
           // console.log("soul+++++++++", key);
@@ -76,43 +76,43 @@ const resolvers = {
         });
       });
     },
-    getRoomMessages: async (_, { roomId }) => {    
+    getRoomMessages: async (_, { roomId }) => {
       return new Promise((resolve, reject) => {
         console.log("getRoomMessages", roomId);
         const chatNode = gun.get('chat');
         const messagesNode = chatNode.get(roomId).get('messages');
-        
+
         const messages = [];
         const processedMessageIds = new Set(); // Set to track processed messageIds
-    
+
         messagesNode.map().on((messageData, messageKey) => {
           console.log("messagedata", messageData);
-          
+
           // Check if messageId is already processed
           if (!processedMessageIds.has(messageKey) && messageData?.userId) {
             const message = {
               messageId: messageKey,
               roomId: roomId,
-              userId: messageData.userId, 
-              message: messageData.message, 
+              userId: messageData.userId,
+              message: messageData.message,
               timestamp: messageData.timestamp
-            };  
-    
+            };
+
             messages.push(message);
             processedMessageIds.add(messageKey); // Add messageId to processed set
           }
         });
-     
+
         messagesNode.once(() => {
           messages.sort((a, b) => a.timestamp - b.timestamp);
-          resolve(messages); 
+          resolve(messages);
         });
       });
-    },    
+    },
     getAllChatMetadata: async (_, { userId }) => {
       return new Promise((resolve, reject) => {
         const allChatMetadata = [];
-    
+
         gun.get('chatMetadata').map().on((data, roomId) => {
           const roomUserIds = roomId.split('_');
           if (roomUserIds.includes(userId) && data && data.lastMessage && !allChatMetadata.some(item => item.roomId === roomId)) {
@@ -124,66 +124,104 @@ const resolvers = {
               messagesCounter: '32'
             });
           }
-        }); 
-    
+        });
+
         // You may need to use the 'once' method here based on Gun.js usage
         gun.get('chatMetadata').once(() => {
           resolve(allChatMetadata);
           console.log("allChatMetadata", allChatMetadata);
         });
       });
-    }    
+    }
   },
   Mutation: {
-    register: async (_, { phoneNumber }) => {
+    register: async (_, { phoneNumber, email }) => {
       // console.log("phoneNumber", phoneNumber);
+      console.log(email);
       return new Promise(async (resolve, reject) => {
         const userNode = gun.get('users');
-  
         try {
           // Generate OTP code
           const otp = Math.floor(1000 + Math.random() * 9000);
           console.log("otp", otp);
-  
-          userNode.get(phoneNumber).once((data, key) => {
-            const encryptedKey = createEncryptedKey(phoneNumber);
+          userNode.get(email).once((data, key) => {
+            if (data) {
+              userNode.get(email).get(phoneNumber).once((data, key) => {
+                const encryptedKey = createEncryptedKey(phoneNumber);
+                // console.log("data.............", !data);
+                console.log(data)
+                if (!data) {
+                  // User data doesn't exist, so create the user
+                  userNode.get(email).put({ pub: encryptedKey, phoneNumber, otp, isReg: true });
 
-            // console.log("data.............", !data);
+                  sendMessage(
+                    `Your verification code is: ${otp}`,
+                    phoneNumber,
+                    'Verification code sent successfully',
+                    'Failed to send verification code',
+                  )
+                    .then(() => {
+                      resolve({ message: 'Verification code sent to your phone number', isReg: true });
+                    })
+                    .catch((error) => {
+                      reject(new Error('Failed to send verification code'));
+                    });
+                } else {
+                  console.log("User data exists, so update the OTP")
+                  console.log(email)
+                  console.log(phoneNumber)
+                  // User data exists, so update the OTP
+                  userNode.get(email).get(phoneNumber).put({ pub: encryptedKey, otp });
 
+                  sendMessage(
+                    `Your verification code is: ${otp}`,
+                    phoneNumber,
+                    'Verification code sent successfully',
+                    'Failed to send verification code',
+                  )
+                    .then(() => {
+                      resolve({ message: 'Verification code sent to your phone number', isReg: data?.isReg });
+                    })
+                    .catch((error) => {
+                      reject(new Error('Failed to send verification code'));
+                    });
+                }
+              });
+            } else {
+              reject(new Error('email not exist'));
+            }
+          })
+
+        } catch (error) {
+          console.error('Error registering user:', error);
+          reject(new Error('Failed to register user'));
+        }
+      });
+    },
+    registerWithMail: async (_, { email, password }) => {
+      // console.log("phoneNumber", phoneNumber);
+      // const tweedClient = await tweedService.initialize();
+      // console.log(tweedClient.wallet.getAddress({ userId: id }));
+      return new Promise(async (resolve, reject) => {
+        const userNode = gun.get('users');
+        try {
+          console.log("==============Start register With Mail=================")
+          userNode.get(email).once((data, key) => {
+            const encryptedKey = createEncryptedKey(email);
             if (!data) {
               // User data doesn't exist, so create the user
-              userNode.get(phoneNumber).put({ pub: encryptedKey, phoneNumber, otp, isReg: true });
-
-              sendMessage(
-                `Your verification code is: ${otp}`,
-                phoneNumber,
-                'Verification code sent successfully',
-                'Failed to send verification code',
-              )
-                .then(() => {
-                  resolve({ message: 'Verification code sent to your phone number', isReg: true });
-                })
-                .catch((error) => {
-                  reject(new Error('Failed to send verification code'));
-                });
+              userNode.get(email).put({ pub: encryptedKey, email, password, isReg: true });
+              resolve({ message: 'Register Successfully', isReg: true });
             } else {
-              // User data exists, so update the OTP
-              userNode.get(phoneNumber).put({ pub: encryptedKey, otp });
-          
-              sendMessage(
-                `Your verification code is: ${otp}`,
-                phoneNumber,
-                'Verification code sent successfully',
-                'Failed to send verification code',
-              )
-                .then(() => {
-                  resolve({ message: 'Verification code sent to your phone number', isReg: data?.isReg });
-                })
-                .catch((error) => {
-                  reject(new Error('Failed to send verification code'));
-                });
+              // User data exists, so update the OTP 
+              if (data?.password == password) {
+                resolve({ message: 'Login Successfully', isReg: data?.isReg });
+              } else {
+                resolve({ message: 'Login info incorrect', isReg: false });
+              }
             }
           });
+          console.log("==============End register With Mail=================")
         } catch (error) {
           console.error('Error registering user:', error);
           reject(new Error('Failed to register user'));
@@ -194,13 +232,10 @@ const resolvers = {
       console.log("verify");
       return new Promise(async (resolve, reject) => {
         try {
-          console.log("verify", userId, otp);
-  
           const userNode = gun.get('users');
           // console.log("userNode", userNode);
           const data = await userNode.get(userId);
-          console.log("data", data);
-  
+
           if (data?.otp == otp) {
             userNode.get(userId).put({ otp: null });
             resolve({
@@ -265,10 +300,10 @@ const resolvers = {
       return new Promise(async (resolve, reject) => {
         try {
           const chatNode = gun.get('chat');
-          
+
           // Assuming you have a unique key for each message (messageId)
           const messageId = generateUniqueMessageId(userId, roomId); // Replace with your logic to generate messageId
-    
+
 
           const date = new Date(Date.now());
           const humanReadableDate = date.toLocaleDateString(); // Get the date in a human-readable format
@@ -284,7 +319,7 @@ const resolvers = {
             message,
             timestamp: Date.now()
           };
-    
+
           // Save the message data to the chat node
           chatNode.get(roomId).get('messages').get(messageId).put(messageObject);
 
@@ -297,7 +332,7 @@ const resolvers = {
           io.emit('newMessage', messageObject);
 
           io.emit('newChat', { roomId, lastMessage: messageObject.message, lastMessageTime: humanReadableDateTime, messagesCounter: "32", icon: "Person" });
-    
+
           // Resolve with success message or other data
           resolve(messageObject);
         } catch (error) {
@@ -306,10 +341,9 @@ const resolvers = {
           reject({ success: false, message: 'Failed to send message' });
         }
       });
-    },  
+    },
     updateProfile: async (_, args) => {
       const { firstName, lastName, dateOfBirth, phone, pin } = args;
-      
       try {
         // Find the user based on the phone number
         const userNode = gun.get('users');
@@ -326,7 +360,7 @@ const resolvers = {
           success: false
         };
       }
-    }    
+    }
   },
 };
 

@@ -25,7 +25,8 @@ const typeDefs = `
   }
 
   type Mutation {
-    register(phoneNumber: String!): RegisterResult
+    register(phoneNumber: String!, email: String!): RegisterResult
+    registerWithMail(email: String!, password: String!): RegisterResult
     verify(userId: String!, otp: String!): VerifyResult
     emptyUserNode: EmptyUsers
     sendMessage(roomId: String!, message: String!, userId: String!): Message
