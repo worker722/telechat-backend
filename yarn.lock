@@ -2096,22 +2096,22 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@paytweed/backend-sdk@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@paytweed/backend-sdk/-/backend-sdk-2.0.0.tgz#9ea00fcc4316cb71a8f603668787a5dc0f9978aa"
-  integrity sha512-YxIoTdpP2PcvnhoP6lYdeITk7ggSj8z5opJq1viXZ9bS4D1CxMZ2d50RZO4gazjh1BwmK6gRKl3U54PSni7fXQ==
+"@paytweed/backend-sdk@^2.0.5":
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/@paytweed/backend-sdk/-/backend-sdk-2.0.10.tgz#b65bd3997176bf55af5b398a618033c4b7e5d913"
+  integrity sha512-3qrJ9C/s0fBdydhZG6UPeXGJSp/RDjXCCL+XfTt++XDLnfKmDNDh5HgSYCSQYNEpFDCpbfeqzuN03exwKpzMpg==
   dependencies:
-    "@paytweed/shared-sdk" "2.0.0"
+    "@paytweed/shared-sdk" "2.0.8"
     auth0 "3.3.0"
     graphql "16.6.0"
     graphql-request "5.1.0"
     graphql-tag "2.12.6"
     path "0.12.7"
 
-"@paytweed/shared-sdk@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@paytweed/shared-sdk/-/shared-sdk-2.0.0.tgz#4281412310511b9f5ae77275affc65e361100909"
-  integrity sha512-cwSqDi6p78O2tuuhD5BFmHA4gcrT1isHjaHSq2+Rryfk58dEt/LXk9emuP2tIjwDP8mlQ1NRJdGPLURB15Zh0A==
+"@paytweed/shared-sdk@2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@paytweed/shared-sdk/-/shared-sdk-2.0.8.tgz#5e789c2e4e0cc92f0b867cdd9d544908c93ef6b2"
+  integrity sha512-CtbHaLlqkAkbA277XAuhJNLkhZT+cT2H15GxykZ2mIFvCjAeiaEYQHt866T0l9IrjZ4tMi1GiZ/9YGNooqkJTA==
   dependencies:
     buffer "6.0.3"
 

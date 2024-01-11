@@ -23,8 +23,8 @@ function createEncryptedKey(phoneNumber) {
 }
 
 const sendMessage = async (body, phoneNumber, successMessage, failedMessage) => {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID || 'AC9cc237eb9d4e9481306592e396970535';
-  const authToken = process.env.TWILIO_AUTH_TOKEN || 'fdbad51ebfccb3cc2bc3f1740748482b';
+  const accountSid = 'AC7e0d6b5067228fafbe24706dadd3a9ad';
+  const authToken = 'b1550cce4f74a27fafb7053be0f7be77';
   const client = twilio(accountSid, authToken);
 
   try {

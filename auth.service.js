@@ -1,6 +1,6 @@
 class AuthService {
-    _userId  = "12345"
-    _userEmail = "olaguivelgabriel20@gmail.com"
+    _userId  = "12345676"
+    _userEmail = "olaguivelgabriel@gmail.com"
 
     getAuthUser() {
         return {
