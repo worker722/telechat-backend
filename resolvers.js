@@ -24,13 +24,12 @@ function createEncryptedKey(phoneNumber) {
 
 const sendMessage = async (body, phoneNumber, successMessage, failedMessage) => {
   const accountSid = 'AC7e0d6b5067228fafbe24706dadd3a9ad';
-  const authToken = 'b1550cce4f74a27fafb7053be0f7be77';
+  const authToken = 'a7205a6d7dc3c26c63a033ec4f30df67';
   const client = twilio(accountSid, authToken);
-
   try {
     await client.messages.create({
       body,
-      from: process.env.TWILIO_PHONE_NUMBER || '+525565280223',
+      from: '+16316571158',
       to: '+' + phoneNumber
     });
 
