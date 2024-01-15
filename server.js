@@ -14,38 +14,22 @@ const typeDefs = require('./schema.graphql');
 const resolvers = require('./resolvers');
 const tweedService = require("./tweed.service");
 const nftService = require("./nft.service");
-const authService = require("./auth.service");
 
 const app = express();
 
 const main = async () => {
   const tweedClient = await tweedService.initialize();
   app.post("/message", async (req, res) => {
-    console.log("=======")
-    const authenticatedUser = authService.getAuthUser();
     const answer = await tweedClient.handleMessageFromFrontend(
       req.body.message,
-      authenticatedUser.id,
-      authenticatedUser.email
+      'id',
+      'email'
     );
     res.send({ answer });
   });
-  app.post("/blockchain-id", (req, res) => {
+  app.post("/testApi", (req, res) => {
     const { blockchainId } = req.body;
     nftService._setBlockchainId(blockchainId);
-  });
-
-  app.get("/user", async (req, res) => {
-    const authUser = authService.getAuthUser();
-    console.log(authUser)
-    res.send({authUser});
-  });
-
-  app.post("/user", async (req, res) => {
-    const id = req.body.id;
-    const email = req.body.email;
-    const updatedUser = authService.updateUser({ id, email });
-    res.send(updatedUser);
   });
 }
 
@@ -82,7 +66,7 @@ const server = http.createServer(app);
 Gun({ web: server });
 
 // store socket on global object
-io = new SocketServer(server, { cors: config.cors, perMessageDeflate: false });
+io = new SocketServer(server, { cors: config.cors,perMessageDeflate :false });
 
 let connectedClients = 0;
 io.on('connection', (socket) => {
